@@ -3,12 +3,14 @@ import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
 import personService from "./services/persons";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     console.log("effect");
@@ -40,12 +42,21 @@ const App = () => {
                 p.id !== objectToFind.id ? p : updatedPerson,
               ),
             );
+           
           });
+          setErrorMessage(`Updated ${newName}`);
+           setTimeout(() => {
+              setErrorMessage(``);
+            }, 3000);
       }
     } else {
       personService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
       });
+      setErrorMessage(`Added ${newName}`);
+      setTimeout(() => {
+        setErrorMessage(``);
+      }, 3000);
     }
     setNewName("");
     setNewNumber("");
@@ -54,8 +65,8 @@ const App = () => {
   const deletePerson = (p) => {
     if (window.confirm(`delete ${p.name} ?`)) {
       personService.del(p.id).then(() => {
-      setPersons(persons.filter(person => person.id !== p.id));
-    });
+        setPersons(persons.filter((person) => person.id !== p.id));
+      });
     }
   };
 
@@ -79,6 +90,7 @@ const App = () => {
   return (
     <div>
       <h2>phonebook</h2>
+      <Notification message={errorMessage} />
       <Filter search={search} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <PersonForm
