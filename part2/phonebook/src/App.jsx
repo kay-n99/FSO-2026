@@ -15,33 +15,49 @@ const App = () => {
     personService.getAll().then((initial) => {
       setPersons(initial);
     });
-  }, [persons]);
+  }, []);
   console.log("render", persons.length, "persons");
 
   const addPerson = (event) => {
     event.preventDefault();
-    if (persons.some((p) => p.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
+    const personObject = {
+      name: newName,
+      number: newNumber,
+      id: (persons.length + 1).toString(),
+    };
+    const objectToFind = persons.find((p) => p.name === newName);
+    if (objectToFind) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with new one?`,
+        )
+      ) {
+        personService
+          .update(objectToFind.id, { ...personObject, id: objectToFind.id })
+          .then((updatedPerson) => {
+            setPersons(
+              persons.map((p) =>
+                p.id !== objectToFind.id ? p : updatedPerson,
+              ),
+            );
+          });
+      }
     } else {
-      const personObject = {
-        name: newName,
-        number: newNumber,
-        id: (persons.length + 1).toString(),
-      };
-
       personService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
-        setNewName("");
-        setNewNumber("");
       });
     }
+    setNewName("");
+    setNewNumber("");
   };
 
   const deletePerson = (p) => {
-    if(window.confirm(`delete ${p.name} ?`)){
-       personService.del(p.id)
+    if (window.confirm(`delete ${p.name} ?`)) {
+      personService.del(p.id).then(() => {
+      setPersons(persons.filter(person => person.id !== p.id));
+    });
     }
-  }
+  };
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -73,7 +89,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons searched={searched} deleteP={deletePerson}/>
+      <Persons searched={searched} deleteP={deletePerson} />
     </div>
   );
 };
