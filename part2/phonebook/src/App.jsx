@@ -15,7 +15,7 @@ const App = () => {
     personService.getAll().then((initial) => {
       setPersons(initial);
     });
-  }, []);
+  }, [persons]);
   console.log("render", persons.length, "persons");
 
   const addPerson = (event) => {
@@ -26,7 +26,7 @@ const App = () => {
       const personObject = {
         name: newName,
         number: newNumber,
-        id: persons.length + 1,
+        id: (persons.length + 1).toString(),
       };
 
       personService.create(personObject).then((returnedPerson) => {
@@ -36,6 +36,12 @@ const App = () => {
       });
     }
   };
+
+  const deletePerson = (p) => {
+    if(window.confirm(`delete ${p.name} ?`)){
+       personService.del(p.id)
+    }
+  }
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -67,7 +73,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons searched={searched} />
+      <Persons searched={searched} deleteP={deletePerson}/>
     </div>
   );
 };
