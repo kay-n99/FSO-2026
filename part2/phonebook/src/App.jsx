@@ -11,6 +11,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     console.log("effect");
@@ -42,17 +43,23 @@ const App = () => {
                 p.id !== objectToFind.id ? p : updatedPerson,
               ),
             );
-           
+          })
+          .catch((error) => {
+            setErrorMessage(error.message);
+            setIsError(true);
+            return
           });
-          setErrorMessage(`Updated ${newName}`);
-           setTimeout(() => {
-              setErrorMessage(``);
-            }, 3000);
+          setIsError(false);
+        setErrorMessage(`Updated ${newName}`);
+        setTimeout(() => {
+          setErrorMessage(``);
+        }, 3000);
       }
     } else {
       personService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
       });
+      setIsError(false)
       setErrorMessage(`Added ${newName}`);
       setTimeout(() => {
         setErrorMessage(``);
@@ -64,10 +71,19 @@ const App = () => {
 
   const deletePerson = (p) => {
     if (window.confirm(`delete ${p.name} ?`)) {
-      personService.del(p.id).then(() => {
-        setPersons(persons.filter((person) => person.id !== p.id));
-      });
+      personService
+        .del(p.id)
+        .then(() => {
+          setPersons(persons.filter((person) => person.id !== p.id));
+        })
+        .catch((error) => {
+          setErrorMessage(error.message);
+          setIsError(true)
+        });
     }
+    setTimeout(() => {
+          setErrorMessage(``);
+        }, 3000);
   };
 
   const handleNameChange = (event) => {
@@ -90,7 +106,7 @@ const App = () => {
   return (
     <div>
       <h2>phonebook</h2>
-      <Notification message={errorMessage} />
+      <Notification message={errorMessage} isError={isError}/>
       <Filter search={search} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <PersonForm
