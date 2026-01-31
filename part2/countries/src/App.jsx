@@ -12,7 +12,7 @@ const App = () => {
         console.log(response.data);
         setCountries(response.data);
       });
-  }, [countries]);
+  }, []);
 
   const searched =
     searchC.length == 0 || countries == null ? (
@@ -25,6 +25,33 @@ const App = () => {
 
   const handleSearchChange = (event) => {
     setSearchC(event.target.value);
+  };
+
+  const CountryList = ({ country }) => {
+    const [isClicked, setIsClicked] = useState(false);
+
+    return (
+      <>
+        <span>{country.name.common}</span>
+        <button onClick={() => setIsClicked(!isClicked)}>{isClicked ? "Hide" : "Show"}</button>
+        {isClicked && (
+          <div>
+            <h2>{country.name.common}</h2>
+            <span>Capital {country.capital}</span>
+            <br />
+            <span>Area {country.area}</span>
+            <h2>Languages</h2>
+            <ul>
+              {Object.keys(country.languages).map((key, index) => (
+                <li key={index}>{country.languages[key]}</li>
+              ))}
+            </ul>
+            <img src={country.flags.png}></img>
+          </div>
+        ) }
+        <br />
+      </>
+    );
   };
 
   return (
@@ -54,12 +81,7 @@ const App = () => {
                 );
               })
             ) : (
-              searched.map((c) => (
-                <>
-                  <span key={c.cca3}>{c.name.common}</span>
-                  <br />
-                </>
-              ))
+              searched.map((c) => <CountryList key={c.ccn3} country={c} />)
             )
           ) : (
             <span>fetching datas...</span>
