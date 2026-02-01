@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Weather from "./components/Weather";
+
+
 const App = () => {
   const [countries, setCountries] = useState(null);
   const [searchC, setSearchC] = useState("");
@@ -27,6 +30,7 @@ const App = () => {
     setSearchC(event.target.value);
   };
 
+
   const CountryList = ({ country }) => {
     const [isClicked, setIsClicked] = useState(false);
 
@@ -47,6 +51,7 @@ const App = () => {
               ))}
             </ul>
             <img src={country.flags.png}></img>
+            <Weather capital={country.capital[0]} />
           </div>
         ) }
         <br />
@@ -65,7 +70,7 @@ const App = () => {
             ) : searched.length == 1 ? (
               searched.map((c) => {
                 return (
-                  <div>
+                  <div key={c.ccn3}>
                     <h2>{c.name.common}</h2>
                     <span>Capital {c.capital}</span>
                     <br />
@@ -77,6 +82,7 @@ const App = () => {
                       ))}
                     </ul>
                     <img src={c.flags.png}></img>
+                    <Weather capital={c.capital[0]} />
                   </div>
                 );
               })
