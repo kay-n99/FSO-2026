@@ -29,12 +29,26 @@ let persons = [
     }
 ]
 
+const getInfo = (p) => {
+  const total = p.reduce((acc, cur) => {
+    return acc + 1;
+  }, 0)
+  return total;
+}
+
 app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/persons', (request, response) => {
     response.json(persons)
+})
+
+app.get('/info', (request, response) => {
+    
+    const Time = new Date().toString()
+    const pCount = persons.length;
+    response.send(`Phonebook has info for ${pCount} people <br>${Time}`)
 })
 
  const PORT = 3001
