@@ -1,6 +1,7 @@
 //  const http = require('http') 
 const express = require('express')
 const app = express()
+app.use(express.json())
  
 //  const app = http.createServer((request, response) => {
 //     response.writeHead(200, { 'Content-Type': 'application/json'})
@@ -29,11 +30,9 @@ let persons = [
     }
 ]
 
-const getInfo = (p) => {
-  const total = p.reduce((acc, cur) => {
-    return acc + 1;
-  }, 0)
-  return total;
+const generateId = () => {
+  const maxId = persons.length > 0 ? Math.max(...persons.map(n => Number(n.id))) : 0
+  return String(maxId + 1)
 }
 
 app.get('/', (request, response) => {
@@ -49,6 +48,42 @@ app.get('/info', (request, response) => {
     const Time = new Date().toString()
     const pCount = persons.length;
     response.send(`Phonebook has info for ${pCount} people <br>${Time}`)
+})
+
+app.get('/api/persons/:id', (request, response) => {
+  const id = request.params.id
+  const person = persons.find(p =>  p.id === id)
+  
+  if(person){
+    response.json(person)
+  }else{
+    response.status(404).end()
+  }
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = request.params.id
+  persons = persons.filter(p => p.id !== id)
+  response.status(204).end()
+})
+
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+
+  if(!body.name ){
+    return response.status(400).json({
+      error: 'content missing'
+    })
+  }
+
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: generateId(),
+  }
+
+  persons = persons.concat(person)
+  response.json(person)
 })
 
  const PORT = 3001
