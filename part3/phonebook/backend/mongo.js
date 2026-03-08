@@ -13,7 +13,7 @@ const personSchema = new mongoose.Schema({
     number: String,
 })
 
-const Person = mongoose.model('Person', personSchema)
+const Person = mongoose.model('Person', phoneSchema)
 
 if(process.argv.length == 3){
    Person.find().then(result => {
