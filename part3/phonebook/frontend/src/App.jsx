@@ -47,9 +47,9 @@ const App = () => {
           .catch((error) => {
             setErrorMessage(error.message);
             setIsError(true);
-            return
+            return;
           });
-          setIsError(false);
+        setIsError(false);
         setErrorMessage(`Updated ${newName}`);
         setTimeout(() => {
           setErrorMessage(``);
@@ -57,9 +57,16 @@ const App = () => {
       }
     } else {
       personService.create(personObject).then((returnedPerson) => {
-        setPersons(persons.concat(returnedPerson));
+        setPersons(persons.concat(returnedPerson)).catch((error) => {
+          setIsError(true);
+          setErrorMessage(`${error.message}`);
+          setTimeout(() => {
+            setErrorMessage(``);
+          }, 3000);
+          return;
+        });
       });
-      setIsError(false)
+      setIsError(false);
       setErrorMessage(`Added ${newName}`);
       setTimeout(() => {
         setErrorMessage(``);
@@ -78,12 +85,12 @@ const App = () => {
         })
         .catch((error) => {
           setErrorMessage(error.message);
-          setIsError(true)
+          setIsError(true);
         });
     }
     setTimeout(() => {
-          setErrorMessage(``);
-        }, 3000);
+      setErrorMessage(``);
+    }, 3000);
   };
 
   const handleNameChange = (event) => {
@@ -106,7 +113,7 @@ const App = () => {
   return (
     <div>
       <h2>phonebook</h2>
-      <Notification message={errorMessage} isError={isError}/>
+      <Notification message={errorMessage} isError={isError} />
       <Filter search={search} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <PersonForm
