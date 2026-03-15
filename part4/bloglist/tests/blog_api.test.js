@@ -87,6 +87,20 @@ test("if the title or url are missing, respond 400", async () => {
     .expect(400)
 })
 
+test('a blog can be deleted', async () => {
+    const initialBlogs = await api.get('/api/blogs')
+    const deletedBlog = initialBlogs.body[0]
+
+    await api.delete(`/api/blogs/${deletedBlog.id}`)
+    .expect(204)
+
+    const afterBlogs = await api.get('/api/blogs')
+    assert.strictEqual(afterBlogs.body.length, initialBlogs.body.length - 1)
+
+    const titles = afterBlogs.body.map(r => r.title)
+    assert.ok(!titles.includes(deletedBlog.title))
+})
+
 after(async () => {
   await mongoose.connection.close();
 });
