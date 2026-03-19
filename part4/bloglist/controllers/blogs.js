@@ -20,23 +20,19 @@ blogsRouter.get("/", async (request, response) => {
 });
 
 blogsRouter.post("/", async (request, response, next) => {
-  const body = request.body;
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if(!decodedToken.id){
-    return response.status(401).json({ error: 'token invalid' })
-  }
-  const user = await User.findById(decodedToken.id)
+  // const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  // if(!decodedToken.id){
+  //   return response.status(401).json({ error: 'token invalid' })
+  // }
+  const user = request.user
   // const user = await User.findById(body.userId)
 
   if(!user){
-    return response.status(400).json({ error: 'userId missing or not valid'})
+    return response.status(401).json({ error: 'token missing or not valid'})
   }
 
   const blog = new Blog({
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes,
+    ...request.body,
     user: user._id
   })
 
@@ -55,21 +51,22 @@ blogsRouter.post("/", async (request, response, next) => {
 });
 
 blogsRouter.delete("/:id", async (request, response) => {
-  if(!request.token){
-    return response.status(401).json({ error: 'token misisng' })
-  }
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  if(!decodedToken.id){
-    return response.status(401).json({ error: 'token invalid' })
-  }
+  // if(!request.token){
+  //   return response.status(401).json({ error: 'token misisng' })
+  // }
+  // const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  // if(!decodedToken.id){
+  //   return response.status(401).json({ error: 'token invalid' })
+  // }
+  const user = request.user
 
   const blog = await Blog.findById(request.params.id)
   if(!blog){
     return response.status(404).json({error: 'blog not found' })
   }
 
-  if(blog.user.toString() !== decodedToken.id.toString()){
-    return response.status(403).json({ error: 'only the creator can delete this blog'})
+  if(!user || blog.user.toString() !== user.id.toString()){
+    return response.status(401).json({ error: 'operation not permitted'})
   }
 
   await Blog.findByIdAndDelete(request.params.id);
