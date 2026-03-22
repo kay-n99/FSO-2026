@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import Notification from "./components/Notification";
 import CreateBlog from "./components/CreateBlog";
+import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 
@@ -19,7 +20,6 @@ const App = () => {
     message: null,
     type: null,
   });
-  const [blogVisible, setBlogVisible] = useState(false);
 
   const notify = (message, type = "success") => {
     setNotification({ message, type });
@@ -85,31 +85,6 @@ const App = () => {
     }
   };
 
-  const BlogForm = () => {
-    const hideWhenVisible = { display: blogVisible ? "none" : "" };
-    const showWhenVisible = { display: blogVisible ? "" : "none" };
-
-    return (
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setBlogVisible(true)}>Create Blog </button>
-        </div>
-        <div style={showWhenVisible}>
-          <CreateBlog
-            handleNew={handleNew}
-            setTitle={setTitle}
-            title={title}
-            setAuthor={setAuthor}
-            author={author}
-            setUrl={setUrl}
-            url={url}
-          />
-          <button onClick={() => setBlogVisible(false)}>cancel</button>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div>
       <Notification message={notification.message} type={notification.type} />
@@ -142,9 +117,22 @@ const App = () => {
         </div>
       ) : (
         <div>
-          <p>{user.username} logged in <button onClick={handleLogout}>logout</button></p>
-          
-          <BlogForm />
+          <p>
+            {user.username} logged in{" "}
+            <button onClick={handleLogout}>logout</button>
+          </p>
+
+          <Togglable buttonLabel="new blog">
+            <CreateBlog
+              handleNew={handleNew}
+              setTitle={setTitle}
+              title={title}
+              setAuthor={setAuthor}
+              author={author}
+              setUrl={setUrl}
+              url={url}
+            />
+          </Togglable>
           <h2>blogs</h2>
           {blogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
