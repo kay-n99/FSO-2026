@@ -1,11 +1,12 @@
 import { useState } from "react";
 
-const Blog = ({ blog, handleLike }) => {
+const Blog = ({ blog, handleLike, handleDelete, user }) => {
   const [visible, setVisible] = useState(false);
 
   const hideWhenVisible = { display: visible ? "none" : "" };
-  const showWhenVisible = {display: visible ? "" : "none"} ;
+  const showWhenVisible = { display: visible ? "" : "none" };
   const label = visible ? "hide" : "view";
+  const showDeleteButton = blog.user.username === user.username;
 
   const toggleVisibility = () => {
     setVisible(!visible);
@@ -14,19 +15,38 @@ const Blog = ({ blog, handleLike }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
-    border: 'solid',
+    border: "solid",
     borderWidth: 1,
-    marginBottom: 5
-  }
+    marginBottom: 5,
+  };
 
   return (
     <div style={blogStyle}>
       {blog.title} {blog.author}
       <button onClick={toggleVisibility}>{label}</button>
       <div style={showWhenVisible}>
-        <span>{blog.url}</span><br/>
-        <span>likes: {blog.likes}<button onClick={() => handleLike(blog)}>like</button></span><br/>
-        <span>{blog.user.name}</span><br/>
+        <span>{blog.url}</span>
+        <br />
+        <span>
+          likes: {blog.likes}
+          <button onClick={() => handleLike(blog)}>like</button>
+        </span>
+        <br />
+        <span>{blog.user.name}</span>
+        <br />
+
+        {showDeleteButton && (
+          <button
+            style={{
+              backgroundColor: "blue",
+              color: "white",
+              borderRadius: "5px",
+            }}
+            onClick={() => handleDelete(blog)}
+          >
+            remove
+          </button>
+        )}
       </div>
     </div>
   );

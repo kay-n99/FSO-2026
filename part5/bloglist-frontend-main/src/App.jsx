@@ -102,6 +102,19 @@ const App = () => {
     }
   };
 
+  const handleDelete = async (blog) => {
+    if(window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)){
+      try{
+        await blogService.remove(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        notify(`Deleted ${blog.title}`)
+      }catch(exception){
+        console.error(exception)
+        notify('Error deleting blog: Unauthorized', 'error')
+      }
+    }
+  }
+
   return (
     <div>
       <Notification message={notification.message} type={notification.type} />
@@ -152,7 +165,7 @@ const App = () => {
           </Togglable>
           <h2>blogs</h2>
           {[...blogs].sort((a,b) => b.likes - a.likes).map((blog) => (
-            <Blog key={blog.id} blog={blog} handleLike={handleLike} />
+            <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete} user={user} />
           ))}
         </div>
       )}
