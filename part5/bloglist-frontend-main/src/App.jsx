@@ -1,89 +1,85 @@
-import { useState, useEffect } from "react";
-import Blog from "./components/Blog";
-import Notification from "./components/Notification";
-import CreateBlog from "./components/CreateBlog";
-import Togglable from "./components/Togglable";
-import blogService from "./services/blogs";
-import loginService from "./services/login";
+import { useState, useEffect } from 'react'
+import Blog from './components/Blog'
+import Notification from './components/Notification'
+import CreateBlog from './components/CreateBlog'
+import Togglable from './components/Togglable'
+import blogService from './services/blogs'
+import loginService from './services/login'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [showAll, setShowAll] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
+  const [blogs, setBlogs] = useState([])
+  // const [showAll, setShowAll] = useState(true)
+  // const [errorMessage, setErrorMessage] = useState(null)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
   const [notification, setNotification] = useState({
     message: null,
     type: null,
-  });
+  })
 
-  const notify = (message, type = "success") => {
-    setNotification({ message, type });
+  const notify = (message, type = 'success') => {
+    setNotification({ message, type })
     setTimeout(() => {
-      setNotification({ message: null, type: null });
-    }, 5000);
-  };
+      setNotification({ message: null, type: null })
+    }, 5000)
+  }
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+    blogService.getAll().then((blogs) => setBlogs(blogs))
+  }, [])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      blogService.setToken(user.token);
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
     }
-  }, []);
+  }, [])
 
   const handleLogin = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
-      const user = await loginService.login({ username, password });
+      const user = await loginService.login({ username, password })
 
-      window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
-      blogService.setToken(user.token);
+      window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
+      blogService.setToken(user.token)
 
-      setUser(user);
-      notify(`Welcome back, ${user.name}`);
-      setUsername("");
-      setPassword("");
+      setUser(user)
+      notify(`Welcome back, ${user.name}`)
+      setUsername('')
+      setPassword('')
     } catch {
-      notify("wrong username or password");
-      setErrorMessage("wrong credentials");
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
+      notify('wrong username or password')
     }
-  };
+  }
 
   const handleLogout = () => {
-    window.localStorage.removeItem("loggedBlogappUser");
-    setUser(null);
-  };
+    window.localStorage.removeItem('loggedBlogappUser')
+    setUser(null)
+  }
 
   const handleNew = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
-      const newBlog = { title, author, url };
-      const returnedBlog = await blogService.create(newBlog);
+      const newBlog = { title, author, url }
+      const returnedBlog = await blogService.create(newBlog)
 
-      setBlogs(blogs.concat(returnedBlog));
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      notify(`a new blog ${title} by ${author} added`);
+      setBlogs(blogs.concat(returnedBlog))
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+      notify(`a new blog ${title} by ${author} added`)
     } catch {
-      notify("failed to create blog: check all fields");
+      notify('failed to create blog: check all fields')
     }
-  };
+  }
 
   const handleLike = async (blog) => {
     try {
@@ -93,14 +89,14 @@ const App = () => {
         author: blog.author,
         title: blog.title,
         url: blog.url,
-      };
+      }
 
-      const returnedBlog = await blogService.update(blog.id, updatedBlog);
-      setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)));
-    } catch (exception) {
-      notify("error updating likes");
+      const returnedBlog = await blogService.update(blog.id, updatedBlog)
+      setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)))
+    } catch {
+      notify('error updating likes')
     }
-  };
+  }
 
   const handleDelete = async (blog) => {
     if(window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)){
@@ -148,7 +144,7 @@ const App = () => {
       ) : (
         <div>
           <p>
-            {user.username} logged in{" "}
+            {user.username} logged in{' '}
             <button onClick={handleLogout}>logout</button>
           </p>
 
@@ -170,6 +166,6 @@ const App = () => {
         </div>
       )}
     </div>
-  );
-};
-export default App;
+  )
+}
+export default App

@@ -44,6 +44,6 @@ const CreateBlog = ({
         <button type="submit">create</button>
       </form>
     </div>
-  );
-};
-export default CreateBlog;
+  )
+}
+export default CreateBlog
