@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Blog from "./Blog";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 
 test("renders title and author, but not url/likes by default", () => {
   const blog = {
@@ -69,6 +69,42 @@ test("button shows details clicked and showing url and link", async () => {
   const likesElement = screen.getByText(/likes: 5/);
   expect(likesElement).toBeDefined();
 
-  const nameElement = screen.getByText('Superuser')
+  const nameElement = screen.getByText("Superuser");
   expect(nameElement).toBeDefined();
+});
+
+test("if like button clicked twice, event handler called twice", async () => {
+  const blog = {
+    title: "Testing mock functions",
+    author: "Test Author",
+    url: "https://testurl.com",
+    likes: 5,
+    user: {
+      username: "testuser",
+      name: "Superuser",
+    },
+  };
+
+  const mockUser = { username: "testuser" };
+  const mockHandler = vi.fn();
+
+  render(
+    <Blog
+      blog={blog}
+      user={mockUser}
+      handleLike={mockHandler}
+      handleDelete={() => {}}
+    />,
+  );
+
+  const user = userEvent.setup();
+
+  const viewButton = screen.getByText("view");
+  await user.click(viewButton);
+
+  const likeButton = screen.getByText("like");
+  await user.click(likeButton);
+  await user.click(likeButton);
+
+  expect(mockHandler.mock.calls).toHaveLength(2);
 });
