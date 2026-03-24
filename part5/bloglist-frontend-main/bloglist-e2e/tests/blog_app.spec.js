@@ -1,20 +1,63 @@
-import  { test, expect } from '@playwright/test'
+import { test, expect } from "@playwright/test";
 
-test.describe('Blog app', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto('http://localhost:5173')
-    })
+test.describe("Blog app", () => {
+  test.beforeEach(async ({ page, request }) => {
+    await request.post("http://localhost:3003/api/testing/reset");
+    await request.post("http://localhost:3003/api/users", {
+      data: {
+        username: "mluukkai",
+        password: "password123",
+        name: "Matti Luukkainen",
+      },
+    });
 
-    test('Login form is shown', async ({page}) => {
-        const header = await page.getByText('Log in to application')
-        await expect(header).toBeVisible()
+    await page.goto("http://localhost:5173");
+  });
 
-        const usernameInput = await page.getByLabel('username')
-        const passwordInput = await page.getByLabel('password')
-        const loginButton = await page.getByRole('button', { name: /login/i })
+  test("Login form is shown", async ({ page }) => {
+    const header = await page.getByText("Log in to application");
+    await expect(header).toBeVisible();
+  });
 
-        await expect(usernameInput).toBeVisible()
-        await expect(passwordInput).toBeVisible()
-        await expect(loginButton).toBeVisible()
-    })
-})
+  test.describe("Login", () => {
+    test("succeeds with correct credentials", async ({ page }) => {
+      await page.getByLabel("username").fill("mluukkai");
+      await page.getByLabel("password").fill("password123");
+      await page.getByRole("button", { name: "login" }).click();
+
+      await expect(page.getByText("mluukkai logged in")).toBeVisible();
+    });
+
+    test("fails with wrong credentials", async ({ page }) => {
+      await page.getByLabel("username").fill("mluukkai");
+      await page.getByLabel("password").fill("wrong");
+      await page.getByRole("button", { name: "login" }).click();
+
+      const errorDiv = await page.locator(".error");
+      await expect(errorDiv).toBeVisible();
+      await expect(errorDiv).toHaveCSS("color", "rgb(255, 0, 0)");
+      await expect(page.getByText("mluukkai logged in")).not.toBeVisible();
+    });
+  });
+});
+
+test.describe("When logged in", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('http://localhost:5173')
+    await page.getByLabel("username").fill("mluukkai");
+    await page.getByLabel("password").fill("password123");
+    await page.getByRole("button", { name: "login" }).click();
+
+    await expect(page.getByText('mluukkai logged in')).toBeVisible()
+  });
+
+  test("a new blog can be created", async ({ page }) => {
+    await page.getByRole("button", { name: "new blog" }).click();
+    await page.getByLabel("title").fill("A blog created by playwright");
+    await page.getByLabel("author").fill("Test Author");
+    await page.getByLabel("url").fill("https://playwright.dev");
+    await page.getByRole("button", { name: "create" }).click();
+
+    await expect(page.getByText('A blog created by playwright by Test Author')).toBeVisible()
+  });
+});
