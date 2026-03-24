@@ -33,7 +33,7 @@ test.describe("Blog app", () => {
       await page.getByLabel("password").fill("wrong");
       await page.getByRole("button", { name: "login" }).click();
 
-      const errorDiv = await page.locator(".error");
+      const errorDiv = page.locator(".error");
       await expect(errorDiv).toBeVisible();
       await expect(errorDiv).toHaveCSS("color", "rgb(255, 0, 0)");
       await expect(page.getByText("mluukkai logged in")).not.toBeVisible();
@@ -43,7 +43,10 @@ test.describe("Blog app", () => {
 
 test.describe("When logged in", () => {
   test.beforeEach(async ({ page, request }) => {
+    // 1. Reset DB
     await request.post("http://localhost:3003/api/testing/reset");
+
+    // 2. Create User
     await request.post("http://localhost:3003/api/users", {
       data: {
         username: "mluukkai",
@@ -52,11 +55,18 @@ test.describe("When logged in", () => {
       },
     });
 
+    // 3. Go to app
     await page.goto("http://localhost:5173");
+    await page.evaluate(() => localStorage.clear());
 
+    // 4. Perform Login
     await page.getByLabel("username").fill("mluukkai");
     await page.getByLabel("password").fill("password123");
     await page.getByRole("button", { name: "login" }).click();
+
+    // --- CRITICAL STEP ---
+    // Wait for the UI to change so we know we are logged in!
+    // If this fails, it means your login logic in App.jsx isn't working with the reset user.
     await expect(page.getByText("mluukkai logged in")).toBeVisible();
   });
 
@@ -84,14 +94,37 @@ test.describe("When logged in", () => {
     const blogElement = page.locator(".blog").filter({ hasText: uniqueTitle });
     await blogElement.getByRole("button", { name: "view" }).click();
 
-    // Use a more resilient check: check that likes contain '0'
-    // without being strict about the exact string "likes 0"
     const likesDiv = blogElement.getByTestId("likes");
     await expect(likesDiv).toContainText("0");
 
     await blogElement.getByRole("button", { name: "like" }).click();
 
-    // Verify it changes to 1
     await expect(likesDiv).toContainText("1");
+  });
+
+  test("a blog can be deleted by the user who created it", async ({ page }) => {
+    const blogTitle = `Delete Me ${Math.floor(Math.random() * 1000)}`;
+
+    await page.getByRole("button", { name: "new blog" }).click();
+    await page.getByLabel("title").fill(blogTitle);
+    await page.getByLabel("author").fill("Test Author");
+    await page.getByLabel("url").fill("https://delete-me.com");
+    await page.getByRole("button", { name: "create" }).click();
+
+    const blogElement = page.locator(".blog").filter({ hasText: blogTitle });
+
+    await blogElement.getByRole("button", { name: "view" }).click();
+
+    const removeButton = blogElement.getByRole("button", { name: "remove" });
+
+    page.on("dialog", async (dialog) => {
+      await dialog.accept();
+    });
+
+    await removeButton.click();
+
+    await expect(
+      page.locator(".blog").filter({ hasText: blogTitle }),
+    ).toHaveCount(0);
   });
 });
