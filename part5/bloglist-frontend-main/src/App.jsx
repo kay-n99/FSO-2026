@@ -55,12 +55,12 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch {
-      notify('wrong username or password')
+      notify('wrong username or password', 'error')
     }
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBlogappUser')
+    window.localStorage.removeItem('loggedBlogAppUser')
     setUser(null)
   }
 

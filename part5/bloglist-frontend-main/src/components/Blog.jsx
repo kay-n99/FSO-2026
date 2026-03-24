@@ -26,30 +26,32 @@ const Blog = ({ blog, handleLike, handleDelete, user }) => {
         <button onClick={toggleVisibility}>{label}</button>
       </div>
       {visible && (
-      <div  className="blog-details">
-        <span>{blog.url}</span>
-        <br />
-        <span>
-          likes: {blog.likes}
-          <button onClick={() => handleLike(blog)}>like</button>
-        </span>
-        <br />
-        <span>{blog.user.name}</span>
-        <br />
+        <div className="blog-details">
+          <span>{blog.url}</span>
+          <br />
+          <span>
+            <div className="likes" data-testid="likes">
+              likes {blog.likes}
+            </div>
+            <button onClick={() => handleLike(blog)}>like</button>
+          </span>
+          <br />
+          <span>{blog.user.name}</span>
+          <br />
 
-        {showDeleteButton && (
-          <button
-            style={{
-              backgroundColor: "blue",
-              color: "white",
-              borderRadius: "5px",
-            }}
-            onClick={() => handleDelete(blog)}
-          >
-            remove
-          </button>
-        )}
-      </div>
+          {showDeleteButton && (
+            <button
+              style={{
+                backgroundColor: "blue",
+                color: "white",
+                borderRadius: "5px",
+              }}
+              onClick={() => handleDelete(blog)}
+            >
+              remove
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
