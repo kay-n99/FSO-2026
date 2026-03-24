@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Blog from "./Blog";
+import CreateBlog from "./CreateBlog";
 import { expect, test, vi } from "vitest";
 
 test("renders title and author, but not url/likes by default", () => {
@@ -107,4 +108,42 @@ test("if like button clicked twice, event handler called twice", async () => {
   await user.click(likeButton);
 
   expect(mockHandler.mock.calls).toHaveLength(2);
+});
+
+test("CreateBlog calls setters and handleNew correctly", async () => {
+  const handleNew = vi.fn((e) => e.preventDefault());
+  const setTitle = vi.fn();
+  const setAuthor = vi.fn();
+  const setUrl = vi.fn();
+
+  const user = userEvent.setup();
+
+  render(
+    <CreateBlog
+      handleNew={handleNew}
+      setTitle={setTitle}
+      setAuthor={setAuthor}
+      setUrl={setUrl}
+      title=""
+      author=""
+      url=""
+    />,
+  );
+
+  const titleInput = screen.getByLabelText(/title/i);
+  const authorInput = screen.getByLabelText(/author/i);
+  const urlInput = screen.getByLabelText(/url/i);
+  const createButton = screen.getByText("create");
+
+  await user.type(titleInput, "Testing React Props");
+  await user.type(authorInput, "Test Author");
+  await user.type(urlInput, "https://test.com");
+
+  await user.click(createButton);
+
+  expect(setTitle).toHaveBeenCalled();
+  expect(setAuthor).toHaveBeenCalled();
+  expect(setUrl).toHaveBeenCalled();
+
+  expect(handleNew).toHaveBeenCalledTimes(1);
 });
