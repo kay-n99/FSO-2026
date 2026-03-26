@@ -12,10 +12,10 @@ const app = express()
 mongoose.connect(config.MONGODB_URI, { family: 4 })
 
 app.use(express.json())
-// if(process.env.NODE_ENV === 'test'){
+if(process.env.NODE_ENV === 'test'){
     const testingRouter = require('./controllers/testing')
     app.use('/api/testing', testingRouter)
-// }
+}
 app.use(middleware.tokenExtractor)
 
 app.use('/api/blogs', middleware.userExtractor, blogsRouter)

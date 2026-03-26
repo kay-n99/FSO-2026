@@ -127,4 +127,40 @@ test.describe("When logged in", () => {
       page.locator(".blog").filter({ hasText: blogTitle }),
     ).toHaveCount(0);
   });
+
+  test('only the creator can see the remove button', async ({ page, request}) => {
+    const blogTitle = 'Only creator should see remove button'
+
+    await page.getByRole('button', {name: 'new blog'}).click()
+    await page.getByLabel('title').fill(blogTitle)
+    await page.getByLabel('author').fill('Test Author')
+    await page.getByLabel('url').fill('https://test.com')
+    await page.getByRole('button', {name: 'create'}).click()
+
+    await expect(page.locator('.blog').filter({ hasText: blogTitle})).toBeVisible()
+
+    await request.post('http://localhost:3003/api/users', {
+      data: {
+        username: 'another',
+        password: 'password',
+        name: 'Another'
+      }
+    })
+
+    await page.getByRole('button', {name: 'logout'}).click()
+
+    await page.getByLabel('username').fill('another')
+    await page.getByLabel('password').fill('password')
+    await page.getByRole('button', { name: 'login'}).click()
+
+    await expect(page.getByText('Another logged in')).toBeVisible()
+
+    const blogElement = page.locator('.blog').filter({ hasText: blogTitle})
+
+    await expect(blogElement).toBeVisible()
+    await blogElement.getByRole('button', {name: 'view'}).click()
+
+    const removeButton = blogElement.getByRole('button', { name: 'remove'})
+    await expect(removeButton).not.toBeVisible()
+  })
 });
