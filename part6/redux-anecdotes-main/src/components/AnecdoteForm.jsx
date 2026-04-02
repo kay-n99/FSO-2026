@@ -10,8 +10,8 @@ const AnecdoteForm = () => {
     e.preventDefault();
     const content = e.target.anec.value;
     e.target.anec.value = "";
-    const newAnecdote = await anecdoteService.createNew(content);
-    dispatch(createAnecdote(newAnecdote));
+    // const newAnecdote = await anecdoteService.createNew(content);
+    dispatch(createAnecdote(content));
     dispatch(setNotification(`you created '${content}'`));
     setTimeout(() => {
       dispatch(clearNotification());
