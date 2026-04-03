@@ -13,6 +13,11 @@ const AnecdoteForm = () => {
       // queryClient.invalidateQueries({ queryKey: ['anecdotes']})
       const anecdotes = queryClient.getQueryData(['anecdotes'])
       queryClient.setQueryData(['anecdotes'], anecdotes.concat(newAnecdote))
+    },
+    onError: (error) => {
+      const message = error.message
+      console.log(message)
+      setNotification(message, 5)
     }
   })
 
