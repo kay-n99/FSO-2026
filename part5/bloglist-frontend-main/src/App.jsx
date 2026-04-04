@@ -8,7 +8,6 @@ import Notification from "./components/Notification";
 import CreateBlog from "./components/CreateBlog";
 import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
-import loginService from "./services/login";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -24,7 +23,6 @@ const App = () => {
     message: null,
     type: null,
   });
-
 
   const notify = (message, type = "success") => {
     setNotification({ message, type });
@@ -46,27 +44,10 @@ const App = () => {
     }
   }, []);
 
-  const handleNew = async (event) => {
-    event.preventDefault();
-
-    try {
-      const newBlog = { title, author, url };
-      const returnedBlog = await blogService.create(newBlog);
-
-      setBlogs(blogs.concat(returnedBlog));
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      notify(`a new blog ${title} by ${author} added`);
-    } catch {
-      notify("failed to create blog: check all fields");
-    }
-  };
-
   const handleLogout = () => {
-        window.localStorage.removeItem('loggedBlogAppUser')
-        setUser(null)
-      }
+    window.localStorage.removeItem("loggedBlogAppUser");
+    setUser(null);
+  };
 
   const padding = {
     padding: 5,
@@ -78,9 +59,11 @@ const App = () => {
         <Link style={padding} to="/">
           blogs
         </Link>
+        <Link style={padding} to="/create">
+          new blog
+        </Link>
         {user ? (
-          <button onClick={handleLogout 
-          }          style={padding}>
+          <button onClick={handleLogout} style={padding}>
             logout
           </button>
         ) : (
@@ -88,51 +71,60 @@ const App = () => {
             login
           </Link>
         )}
-  
       </div>
       <Routes>
-        <Route path="/blogs/:id" element={<Blog blogs={blogs} user={user} notify={notify} setBlogs={setBlogs}/>} />
+        <Route
+          path="/create"
+          element={
+            <CreateBlog
+              blogs={blogs}
+              setBlogs={setBlogs}
+              notify={notify}
+              setTitle={setTitle}
+              title={title}
+              setAuthor={setAuthor}
+              author={author}
+              setUrl={setUrl}
+              url={url}
+            />
+          }
+        />
+        <Route
+          path="/blogs/:id"
+          element={
+            <Blog
+              blogs={blogs}
+              user={user}
+              notify={notify}
+              setBlogs={setBlogs}
+            />
+          }
+        />
         <Route
           path="/"
           element={
-            <>
             <BlogList
               blogs={blogs}
               setBlogs={setBlogs}
               user={user}
               notify={notify}
             />
-            <Togglable buttonLabel="new blog">
-             <CreateBlog
-               handleNew={handleNew}
-               setTitle={setTitle}
-               title={title}
-               setAuthor={setAuthor}
-               author={author}
-               setUrl={setUrl}
-               url={url}
-             />
-           </Togglable></>
-            
-             
           }
         />
-        
-          <Route
-            path="/login"
-            element={
-              <UserLogin
-                username={username}
-                password={password}
-                setUser={setUser}
-                setUsername={setUsername}
-                setPassword={setPassword}
-                notify={notify}
-                
-              />
-            }
-          />
-        
+
+        <Route
+          path="/login"
+          element={
+            <UserLogin
+              username={username}
+              password={password}
+              setUser={setUser}
+              setUsername={setUsername}
+              setPassword={setPassword}
+              notify={notify}
+            />
+          }
+        />
       </Routes>
     </Router>
     // <div>

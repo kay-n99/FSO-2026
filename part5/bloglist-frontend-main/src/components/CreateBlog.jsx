@@ -1,12 +1,38 @@
+import {useNavigate } from "react-router-dom";
+import blogService from "../services/blogs";
+
 const CreateBlog = ({
-  handleNew,
+  blogs,
+  setBlogs,
   setTitle,
   title,
   setAuthor,
   author,
   setUrl,
   url,
+  notify
 }) => {
+  const navigate = useNavigate();
+
+  const handleNew = async (event) => {
+    event.preventDefault();
+
+    try {
+      
+      const newBlog = { title, author, url };
+      const returnedBlog = await blogService.create(newBlog);
+      console.log(returnedBlog);
+      setBlogs(blogs.concat(returnedBlog));
+      setTitle("");
+      setAuthor("");
+      setUrl("");
+      notify(`a new blog ${title} by ${author} added`);
+      navigate("/");
+    } catch {
+      notify("failed to create blog: check all fields");
+    }
+  };
+
   return (
     <div>
       <h2>create new</h2>

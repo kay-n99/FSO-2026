@@ -1,5 +1,5 @@
 import { useState, useEffect} from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import blogService from "../services/blogs";
 
 const Blog = ({ blogs, setBlogs, notify , user, }) => {
@@ -8,6 +8,7 @@ const Blog = ({ blogs, setBlogs, notify , user, }) => {
   console.log('Current blog likes in render:', blog?.likes)
   if(!blog) return null;
   const [visible, setVisible] = useState(false);
+  const navigate = useNavigate();
 
   const showWhenVisible = { display: visible ? "" : "none" };
   const label = visible ? "hide" : "view";
@@ -43,6 +44,7 @@ const Blog = ({ blogs, setBlogs, notify , user, }) => {
         await blogService.remove(blog.id);
         setBlogs(blogs.filter((b) => b.id !== blog.id));
         notify(`Deleted ${blog.title}`);
+        navigate("/");
       } catch (exception) {
         console.error(exception);
         notify("Error deleting blog: Unauthorized", "error");
