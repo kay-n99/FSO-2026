@@ -1,40 +1,38 @@
-import { useState, useEffect} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import blogService from "../services/blogs";
+import { 
+  Button, 
+  Typography, 
+  Card, 
+  CardContent, 
+  CardActions, 
+  Stack, 
+  Link,
+  Divider 
+} from "@mui/material";
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-const Blog = ({ blogs, setBlogs, notify , user, }) => {
-  const id = useParams().id  
-  const blog = blogs.find(n => n.id === id)
-  console.log('Current blog likes in render:', blog?.likes)
-  if(!blog) return null;
-  const [visible, setVisible] = useState(false);
+const Blog = ({ blogs, setBlogs, notify, user }) => {
+  const id = useParams().id;
+  const blog = blogs.find((n) => n.id === id);
   const navigate = useNavigate();
 
-  const showWhenVisible = { display: visible ? "" : "none" };
-  const label = visible ? "hide" : "view";
-  const showDeleteButton = user && blog.user.username === user.username;
-  const isLoggedIn = user !== null;
-  // if(user) {const showDeleteButton = blog.user.username === user.username;}
-  
+  if (!blog) return <Typography variant="h6">Blog not found</Typography>;
 
-  const toggleVisibility = () => {
-    setVisible(!visible);
-  };
+  const showDeleteButton = user && blog.user.username === user.username;
 
   const handleLike = async (blog) => {
     try {
       const updatedBlog = {
+        ...blog,
         user: blog.user.id || blog.user,
         likes: blog.likes + 1,
-        author: blog.author,
-        title: blog.title,
-        url: blog.url,
       };
-
       const returnedBlog = await blogService.update(blog.id, updatedBlog);
       setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)));
     } catch {
-      notify("error updating likes");
+      notify("Error updating likes", "error");
     }
   };
 
@@ -46,55 +44,67 @@ const Blog = ({ blogs, setBlogs, notify , user, }) => {
         notify(`Deleted ${blog.title}`);
         navigate("/");
       } catch (exception) {
-        console.error(exception);
         notify("Error deleting blog: Unauthorized", "error");
       }
     }
   };
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: "solid",
-    borderWidth: 1,
-    marginBottom: 5,
-  };
-
   return (
-    <div style={blogStyle} className="blog">
-      <div className="blog-main">
-        {blog.title} {blog.author}
-        {/* <button onClick={toggleVisibility}>{label}</button> */}
-      </div>
-      {/* {visible && ( */}
-        <div className="blog-details">
-          <span>{blog.url}</span>
-          <br />
-          <span>
-            <div className="likes" data-testid="likes">
-              likes {blog.likes}
-            </div>
-            {isLoggedIn && <button onClick={() => handleLike(blog)}>like</button>}
-          </span>
-          <br />
-          <span>{blog.user.name}</span>
-          <br />
+    <Card variant="outlined" sx={{ maxWidth: 600, mt: 4, mx: "auto", boxShadow: 3 }}>
+      <CardContent>
+        <Stack spacing={2}>
+          <Typography variant="h4" component="h2" gutterBottom color="primary">
+            {blog.title}
+          </Typography>
+          
+          <Typography variant="subtitle1" color="text.secondary">
+            Author: <strong>{blog.author}</strong>
+          </Typography>
+          
+          <Divider />
 
-          {showDeleteButton && (
-            <button
-              style={{
-                backgroundColor: "blue",
-                color: "white",
-                borderRadius: "5px",
-              }}
-              onClick={() => handleDelete(blog)}
-            >
-              remove
-            </button>
-          )}
-        </div>
-      {/* )} */}
-    </div>
+          <Link href={blog.url} target="_blank" rel="noopener" underline="hover">
+            {blog.url}
+          </Link>
+
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Typography variant="body1" data-testid="likes">
+              <strong>{blog.likes}</strong> likes
+            </Typography>
+            {user && (
+              <Button 
+                variant="contained" 
+                size="small" 
+                startIcon={<ThumbUpIcon />} 
+                onClick={() => handleLike(blog)}
+              >
+                Like
+              </Button>
+            )}
+          </Stack>
+
+          <Typography variant="body2" color="text.secondary">
+            Added by <em>{blog.user.name}</em>
+          </Typography>
+        </Stack>
+      </CardContent>
+
+      <CardActions sx={{ justifyContent: "flex-end", p: 2 }}>
+        {showDeleteButton && (
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={() => handleDelete(blog)}
+          >
+            Remove
+          </Button>
+        )}
+        <Button size="small" onClick={() => navigate("/")}>
+          Back to List
+        </Button>
+      </CardActions>
+    </Card>
   );
 };
 

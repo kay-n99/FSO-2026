@@ -8,7 +8,7 @@ import Notification from "./components/Notification";
 import CreateBlog from "./components/CreateBlog";
 import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
-
+import { AppBar, Toolbar, Button } from "@mui/material";
 
 
 const App = () => {
@@ -51,28 +51,35 @@ const App = () => {
     setUser(null);
   };
 
-  const padding = {
-    padding: 5,
+  const style = {
+    '&:hover': {bgcolor: 'primary.main', color: 'white'},
+    marginRight: 2,
   };
 
   return (
     <Router>
       <div>
-        <Link style={padding} to="/">
-          blogs
-        </Link>
-        <Link style={padding} to="/create">
-          new blog
-        </Link>
-        {user ? (
-          <button onClick={handleLogout} style={padding}>
-            logout
-          </button>
-        ) : (
-          <Link style={padding} to="/login">
-            login
-          </Link>
-        )}
+        <AppBar position="static">  
+          <Toolbar> 
+            
+            <Button color="inherit" component={Link} to="/" sx={style}>
+              Blogs
+            </Button>
+            <Button color="inherit" component={Link} to="/create" sx={style}>
+              New Blog
+            </Button>
+            {user ? (
+              <Button color="inherit" onClick={handleLogout} sx={style}>
+                Logout
+              </Button>
+            ) : (
+              <Button color="inherit" component={Link} to="/login" sx={style}>
+                Login
+              </Button>
+            )}
+          </Toolbar>
+        </AppBar>
+        
         <Notification message={notification.message} type={notification.type} /> 
       </div>
       <Routes>
