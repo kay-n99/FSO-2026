@@ -9,6 +9,8 @@ import CreateBlog from "./components/CreateBlog";
 import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 
+
+
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   // const [showAll, setShowAll] = useState(true)
@@ -71,6 +73,7 @@ const App = () => {
             login
           </Link>
         )}
+        <Notification message={notification.message} type={notification.type} /> 
       </div>
       <Routes>
         <Route
@@ -125,34 +128,9 @@ const App = () => {
             />
           }
         />
+      
       </Routes>
     </Router>
-    // <div>
-    //   <Notification message={notification.message} type={notification.type} />
-    //   {user === null ? (
-    //     <BlogList blogs={blogs} setBlogs={setBlogs} user={user} notify={notify} />
-    //   ) : (
-    //     <div>
-    //       {/* <p>
-    //         {user.username} logged in{' '}
-    //         <button onClick={handleLogout}>logout</button>
-    //       </p>
-
-    //       <Togglable buttonLabel="new blog">
-    //         <CreateBlog
-    //           handleNew={handleNew}
-    //           setTitle={setTitle}
-    //           title={title}
-    //           setAuthor={setAuthor}
-    //           author={author}
-    //           setUrl={setUrl}
-    //           url={url}
-    //         />
-    //       </Togglable> */}
-
-    //     </div>
-    //   )}
-    // </div>
   );
 };
 export default App;

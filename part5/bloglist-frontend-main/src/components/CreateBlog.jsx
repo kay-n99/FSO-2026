@@ -1,5 +1,6 @@
 import {useNavigate } from "react-router-dom";
 import blogService from "../services/blogs";
+import { TextField, Button } from "@mui/material";
 
 const CreateBlog = ({
   blogs,
@@ -38,36 +39,30 @@ const CreateBlog = ({
       <h2>create new</h2>
       <form onSubmit={handleNew}>
         <div>
-          <label>
-            title
-            <input
-              type="text"
-              value={title}
+          <TextField
+            label="Title"
+            value={title}
               onChange={({ target }) => setTitle(target.value)}
             />
-          </label>
+          
         </div>
         <div>
-          <label>
-            author
-            <input
-              type="text"
-              value={author}
-              onChange={({ target }) => setAuthor(target.value)}
-            />
-          </label>
+          <TextField
+            label="Author"
+            value={author}
+            onChange={({ target }) => setAuthor(target.value)}
+          />
         </div>
         <div>
-          <label>
-            url
-            <input
-              type="text"
-              value={url}
-              onChange={({ target }) => setUrl(target.value)}
-            />
-          </label>
+          <TextField
+            label="URL"
+            value={url}
+            onChange={({ target }) => setUrl(target.value)}
+          />
         </div>
-        <button type="submit">create</button>
+        <Button type="submit" variant="contained" color="primary">
+          create
+        </Button>
       </form>
     </div>
   )
