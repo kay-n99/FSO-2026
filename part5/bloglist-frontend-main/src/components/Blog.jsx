@@ -5,7 +5,8 @@ const Blog = ({ blog, handleLike, handleDelete, user }) => {
 
   const showWhenVisible = { display: visible ? "" : "none" };
   const label = visible ? "hide" : "view";
-  const showDeleteButton = blog.user.username === user.username;
+  if(user) {const showDeleteButton = blog.user.username === user.username;}
+  
 
   const toggleVisibility = () => {
     setVisible(!visible);
