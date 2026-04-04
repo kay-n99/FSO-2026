@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import BlogList from "./components/BlogList";
+import Blog from "./components/Blog";
 import UserLogin from "./components/UserLogin";
 import Notification from "./components/Notification";
 import CreateBlog from "./components/CreateBlog";
@@ -90,15 +91,30 @@ const App = () => {
   
       </div>
       <Routes>
+        <Route path="/blogs/:id" element={<Blog blogs={blogs} user={user} notify={notify} setBlogs={setBlogs}/>} />
         <Route
           path="/"
           element={
+            <>
             <BlogList
               blogs={blogs}
               setBlogs={setBlogs}
               user={user}
               notify={notify}
             />
+            <Togglable buttonLabel="new blog">
+             <CreateBlog
+               handleNew={handleNew}
+               setTitle={setTitle}
+               title={title}
+               setAuthor={setAuthor}
+               author={author}
+               setUrl={setUrl}
+               url={url}
+             />
+           </Togglable></>
+            
+             
           }
         />
         

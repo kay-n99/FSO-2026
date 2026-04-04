@@ -1,15 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
+import { useParams } from "react-router-dom";
+import blogService from "../services/blogs";
 
-const Blog = ({ blog, handleLike, handleDelete, user }) => {
+const Blog = ({ blogs, setBlogs, notify , user, }) => {
+  const id = useParams().id  
+  const blog = blogs.find(n => n.id === id)
+  console.log('Current blog likes in render:', blog?.likes)
+  if(!blog) return null;
   const [visible, setVisible] = useState(false);
 
   const showWhenVisible = { display: visible ? "" : "none" };
   const label = visible ? "hide" : "view";
-  if(user) {const showDeleteButton = blog.user.username === user.username;}
+  const showDeleteButton = user && blog.user.username === user.username;
+  const isLoggedIn = user !== null;
+  // if(user) {const showDeleteButton = blog.user.username === user.username;}
   
 
   const toggleVisibility = () => {
     setVisible(!visible);
+  };
+
+  const handleLike = async (blog) => {
+    try {
+      const updatedBlog = {
+        user: blog.user.id || blog.user,
+        likes: blog.likes + 1,
+        author: blog.author,
+        title: blog.title,
+        url: blog.url,
+      };
+
+      const returnedBlog = await blogService.update(blog.id, updatedBlog);
+      setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)));
+    } catch {
+      notify("error updating likes");
+    }
+  };
+
+  const handleDelete = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      try {
+        await blogService.remove(blog.id);
+        setBlogs(blogs.filter((b) => b.id !== blog.id));
+        notify(`Deleted ${blog.title}`);
+      } catch (exception) {
+        console.error(exception);
+        notify("Error deleting blog: Unauthorized", "error");
+      }
+    }
   };
 
   const blogStyle = {
@@ -24,9 +62,9 @@ const Blog = ({ blog, handleLike, handleDelete, user }) => {
     <div style={blogStyle} className="blog">
       <div className="blog-main">
         {blog.title} {blog.author}
-        <button onClick={toggleVisibility}>{label}</button>
+        {/* <button onClick={toggleVisibility}>{label}</button> */}
       </div>
-      {visible && (
+      {/* {visible && ( */}
         <div className="blog-details">
           <span>{blog.url}</span>
           <br />
@@ -34,7 +72,7 @@ const Blog = ({ blog, handleLike, handleDelete, user }) => {
             <div className="likes" data-testid="likes">
               likes {blog.likes}
             </div>
-            <button onClick={() => handleLike(blog)}>like</button>
+            {isLoggedIn && <button onClick={() => handleLike(blog)}>like</button>}
           </span>
           <br />
           <span>{blog.user.name}</span>
@@ -53,7 +91,7 @@ const Blog = ({ blog, handleLike, handleDelete, user }) => {
             </button>
           )}
         </div>
-      )}
+      {/* )} */}
     </div>
   );
 };
