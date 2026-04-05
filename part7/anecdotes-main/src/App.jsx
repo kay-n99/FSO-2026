@@ -1,26 +1,33 @@
 import { useState } from 'react'
-import {
-  Routes, Route, Link, 
-  useMatch, useNavigate
-} from 'react-router-dom'
+import { Routes, Route, Link, useMatch, useNavigate } from 'react-router-dom'
 import { useField } from './hooks'
 
 const Menu = () => {
   const padding = { paddingRight: 5 }
   return (
     <div>
-      <Link style={padding} to="/">anecdotes</Link>
-      <Link style={padding} to="/create">create new</Link>
-      <Link style={padding} to="/about">about</Link>
+      <Link style={padding} to="/">
+        anecdotes
+      </Link>
+      <Link style={padding} to="/create">
+        create new
+      </Link>
+      <Link style={padding} to="/about">
+        about
+      </Link>
     </div>
   )
 }
 
 const Anecdote = ({ anecdote }) => (
   <div>
-    <h2>{anecdote.content} by {anecdote.author}</h2>
+    <h2>
+      {anecdote.content} by {anecdote.author}
+    </h2>
     <p>has {anecdote.votes} votes</p>
-    <p>for more info see <a href={anecdote.info}>{anecdote.info}</a></p>
+    <p>
+      for more info see <a href={anecdote.info}>{anecdote.info}</a>
+    </p>
   </div>
 )
 
@@ -28,11 +35,11 @@ const AnecdoteList = ({ anecdotes }) => (
   <div>
     <h2>Anecdotes</h2>
     <ul>
-      {anecdotes.map(anecdote => 
+      {anecdotes.map((anecdote) => (
         <li key={anecdote.id}>
           <Link to={`/anecdotes/${anecdote.id}`}>{anecdote.content}</Link>
         </li>
-      )}
+      ))}
     </ul>
   </div>
 )
@@ -41,13 +48,16 @@ const About = () => (
   <div>
     <h2>About anecdote app</h2>
     <p>According to Wikipedia:</p>
-    <em>An anecdote is a brief, revealing account of an individual person or an incident...</em>
+    <em>
+      An anecdote is a brief, revealing account of an individual person or an
+      incident...
+    </em>
   </div>
 )
 
 const Footer = () => (
   <div>
-    Anecdote app for <a href='https://fullstackopen.com/'>Full Stack Open</a>.
+    Anecdote app for <a href="https://fullstackopen.com/">Full Stack Open</a>.
   </div>
 )
 
@@ -57,6 +67,10 @@ const CreateNew = (props) => {
   const author = useField('text')
   const info = useField('text')
 
+  const {reset: resetContent, ...contentParams } = content
+  const {reset: resetAuthor, ...authorParams } = author
+  const {reset: resetInfo, ...infoParams } = info
+
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
@@ -65,9 +79,15 @@ const CreateNew = (props) => {
       content: content.value,
       author: author.value,
       info: info.value,
-      votes: 0
+      votes: 0,
     })
     navigate('/')
+  }
+
+  const handleReset = () => {
+    resetContent()
+    resetAuthor()
+    resetInfo()
   }
 
   return (
@@ -76,22 +96,25 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input {...content} /> 
+          <input {...contentParams} />
         </div>
         <div>
           author
-          <input {...author} />
+          <input {...authorParams} />
         </div>
         <div>
           url for more info
-          <input {...info} />
+          <input {...infoParams} />
         </div>
         <button type="submit">create</button>
-        <button type="button" onClick={() => {
-          content.reset()
-          author.reset()
-          info.reset()
-        }}>reset</button>
+        <button
+          type="button"
+          onClick={() => {
+            handleReset
+          }}
+        >
+          reset
+        </button>
       </form>
     </div>
   )
@@ -104,15 +127,15 @@ const App = () => {
       author: 'Jez Humble',
       info: 'https://martinfowler.com/bliki/FrequencyReducesDifficulty.html',
       votes: 0,
-      id: 1
+      id: 1,
     },
     {
       content: 'Premature optimization is the root of all evil',
       author: 'Donald Knuth',
       info: 'http://wiki.c2.com/?PrematureOptimization',
       votes: 0,
-      id: 2
-    }
+      id: 2,
+    },
   ])
 
   const [notification, setNotification] = useState('')
@@ -125,8 +148,8 @@ const App = () => {
   }
 
   const match = useMatch('/anecdotes/:id')
-  const anecdote = match 
-    ? anecdotes.find(a => a.id === Number(match.params.id))
+  const anecdote = match
+    ? anecdotes.find((a) => a.id === Number(match.params.id))
     : null
 
   return (
@@ -134,9 +157,12 @@ const App = () => {
       <h1>Software anecdotes</h1>
       <Menu />
       {notification && <div>{notification}</div>}
-      
+
       <Routes>
-        <Route path="/anecdotes/:id" element={<Anecdote anecdote={anecdote} />} />
+        <Route
+          path="/anecdotes/:id"
+          element={<Anecdote anecdote={anecdote} />}
+        />
         <Route path="/create" element={<CreateNew addNew={addNew} />} />
         <Route path="/about" element={<About />} />
         <Route path="/" element={<AnecdoteList anecdotes={anecdotes} />} />
