@@ -1,38 +1,54 @@
-import {useNavigate } from "react-router-dom";
 import blogService from "../services/blogs";
 import { TextField, Button } from "@mui/material";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const CreateBlog = ({
-  blogs,
-  setBlogs,
   setTitle,
   title,
   setAuthor,
   author,
   setUrl,
   url,
-  notify
+  notify,
 }) => {
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const newBlogMutation = useMutation({
+    mutationFn: blogService.create,
+    onSucess: (newBlog) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      notify(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+    },
+    onError: (error) => {
+      notify(error.response?.data?.error || 'Error creating blog', 'errro')
+    }
+  })
 
   const handleNew = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
+    newBlogMutation.mutate({ title, author, url})
+    setTitle('')
+    setAuthor('')
+    setUrl('')
+  }
 
-    try {
-      
-      const newBlog = { title, author, url };
-      const returnedBlog = await blogService.create(newBlog);
-      console.log(returnedBlog);
-      setBlogs(blogs.concat(returnedBlog));
-      setTitle("");
-      setAuthor("");
-      setUrl("");
-      notify(`a new blog ${title} by ${author} added`);
-      navigate("/");
-    } catch {
-      notify("failed to create blog: check all fields");
-    }
-  };
+  // const handleNew = async (event) => {
+  //   event.preventDefault();
+
+  //   try {
+  //     const newBlog = { title, author, url };
+  //     const returnedBlog = await blogService.create(newBlog);
+  //     console.log(returnedBlog);
+  //     setBlogs(blogs.concat(returnedBlog));
+  //     setTitle("");
+  //     setAuthor("");
+  //     setUrl("");
+  //     notify(`a new blog ${title} by ${author} added`);
+  //     navigate("/");
+  //   } catch {
+  //     notify("failed to create blog: check all fields");
+  //   }
+  // };
 
   return (
     <div>
@@ -42,9 +58,8 @@ const CreateBlog = ({
           <TextField
             label="Title"
             value={title}
-              onChange={({ target }) => setTitle(target.value)}
-            />
-          
+            onChange={({ target }) => setTitle(target.value)}
+          />
         </div>
         <div>
           <TextField
@@ -65,6 +80,6 @@ const CreateBlog = ({
         </Button>
       </form>
     </div>
-  )
-}
-export default CreateBlog
+  );
+};
+export default CreateBlog;

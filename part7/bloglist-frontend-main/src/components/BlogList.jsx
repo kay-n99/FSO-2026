@@ -1,9 +1,7 @@
-import Blog from "./Blog";
-import blogService from "../services/blogs";
 import { Link } from "react-router-dom";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
 
-const BlogList = ({ blogs, setBlogs, user, notify }) => {
+const BlogList = ({ blogs }) => {
   
 
   return (

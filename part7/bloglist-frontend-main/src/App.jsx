@@ -10,10 +10,10 @@ import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 import { AppBar, Toolbar, Button } from "@mui/material";
 import { useNotificationDispatch, useNotificationValue } from "./NotificationContext";
-
+import { useQuery } from "@tanstack/react-query"
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
+  // const [blogs, setBlogs] = useState([]);
   // const [showAll, setShowAll] = useState(true)
   // const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState("");
@@ -33,9 +33,16 @@ const App = () => {
     }, 5000);
   };
 
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+  // useEffect(() => {
+  //   blogService.getAll().then((blogs) => setBlogs(blogs));
+  // }, []);
+
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
+    retry: 1,
+    refetchOnWindowFocus: false
+  })
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
@@ -45,6 +52,12 @@ const App = () => {
       blogService.setToken(user.token);
     }
   }, []);
+
+  if(result.isLoading){
+    return <div>loading data...</div>
+  }
+
+  const blogs = result.data
 
   const handleLogout = () => {
     window.localStorage.removeItem("loggedBlogAppUser");
@@ -88,7 +101,7 @@ const App = () => {
           element={
             <CreateBlog
               blogs={blogs}
-              setBlogs={setBlogs}
+              // setBlogs={setBlogs}
               notify={notify}
               setTitle={setTitle}
               title={title}
@@ -106,7 +119,7 @@ const App = () => {
               blogs={blogs}
               user={user}
               notify={notify}
-              setBlogs={setBlogs}
+              // setBlogs={setBlogs}
             />
           }
         />
@@ -115,7 +128,7 @@ const App = () => {
           element={
             <BlogList
               blogs={blogs}
-              setBlogs={setBlogs}
+              // setBlogs={setBlogs}
               user={user}
               notify={notify}
             />
