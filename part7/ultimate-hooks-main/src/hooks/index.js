@@ -14,7 +14,7 @@ export const useResource = (baseUrl) => {
 
     const create = async (newObject) => {
         const response = await axios.post(baseUrl, newObject)
-        setResources(resources.concat(response.data))
+        setResources(resources.concat(response.data))   
         return response.data
     }
 
