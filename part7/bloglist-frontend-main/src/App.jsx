@@ -11,6 +11,7 @@ import blogService from "./services/blogs";
 import { AppBar, Toolbar, Button } from "@mui/material";
 import { useNotificationDispatch, useNotificationValue } from "./NotificationContext";
 import { useQuery } from "@tanstack/react-query"
+import { useUserDispatch, useUserValue } from "./UserContext";
 
 const App = () => {
   // const [blogs, setBlogs] = useState([]);
@@ -18,7 +19,9 @@ const App = () => {
   // const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
+  const user = useUserValue();
+  const userDispatch = useUserDispatch();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
@@ -48,10 +51,10 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setUser(user);
+      userDispatch({type: 'SET_USER', payload: user})
       blogService.setToken(user.token);
     }
-  }, []);
+  }, [userDispatch]);
 
   if(result.isLoading){
     return <div>loading data...</div>
@@ -61,7 +64,7 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.removeItem("loggedBlogAppUser");
-    setUser(null);
+    userDispatch({type: 'LOGOUT'})
   };
 
   const style = {
@@ -117,7 +120,7 @@ const App = () => {
           element={
             <Blog
               blogs={blogs}
-              user={user}
+              // user={user}
               notify={notify}
               // setBlogs={setBlogs}
             />
@@ -129,7 +132,7 @@ const App = () => {
             <BlogList
               blogs={blogs}
               // setBlogs={setBlogs}
-              user={user}
+              // user={user}
               notify={notify}
             />
           }
@@ -141,7 +144,7 @@ const App = () => {
             <UserLogin
               username={username}
               password={password}
-              setUser={setUser}
+              // setUser={setUser}
               setUsername={setUsername}
               setPassword={setPassword}
               notify={notify}

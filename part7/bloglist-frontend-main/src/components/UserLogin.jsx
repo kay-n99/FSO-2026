@@ -2,9 +2,11 @@ import { useNavigate } from "react-router-dom";
 import loginService from "../services/login";
 import blogService from "../services/blogs";
 import { TextField, Button } from "@mui/material";
+import { useUserDispatch } from "../UserContext";
 
 const UserLogin = ({ username, password, setUser, setUsername, setPassword, notify }) => {
     const navigate = useNavigate();
+    const userDispatch =useUserDispatch();
     const handleLogin = async (event) => {
         event.preventDefault()
     
@@ -14,7 +16,7 @@ const UserLogin = ({ username, password, setUser, setUsername, setPassword, noti
           window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
           blogService.setToken(user.token)
     
-          setUser(user)
+          userDispatch({ type: 'SET_USER', payload: user })
           notify(`Welcome back, ${user.name}`)
           setUsername('')
           setPassword('')

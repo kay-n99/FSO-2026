@@ -13,8 +13,10 @@ import {
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useUserValue } from '../UserContext'
 
-const Blog = ({ blogs, notify, user }) => {
+const Blog = ({ blogs, notify }) => {
+  const user = useUserValue();
   const id = useParams().id;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
