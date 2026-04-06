@@ -12,42 +12,77 @@ import {
 } from "@mui/material";
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const Blog = ({ blogs, setBlogs, notify, user }) => {
+const Blog = ({ blogs, notify, user }) => {
   const id = useParams().id;
-  const blog = blogs.find((n) => n.id === id);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: blogService.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs']})
+      notify('Blog removed successfully')
+    },
+    onError: (error) => {
+      const message =  error.response?.data?.error || 'Failed to remove blog'
+      notify(message, 'error')
+    }
+  })
+
+  const updateBlogMutation = useMutation({
+    mutationFn: (updatedBlog) => {
+      return blogService.update(updatedBlog.id, updatedBlog)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs']})
+      notify(`You liked '${updatedBlog.title}`)
+    }
+  })
+
+  const blog = blogs.find((n) => n.id === id);
 
   if (!blog) return <Typography variant="h6">Blog not found</Typography>;
 
   const showDeleteButton = user && blog.user.username === user.username;
 
-  const handleLike = async (blog) => {
-    try {
-      const updatedBlog = {
-        ...blog,
-        user: blog.user.id || blog.user,
-        likes: blog.likes + 1,
-      };
-      const returnedBlog = await blogService.update(blog.id, updatedBlog);
-      setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)));
-    } catch {
-      notify("Error updating likes", "error");
+  const handleLike = () => {
+    const updatedBlog =  {
+      ...blog,
+      likes: blog.likes + 1,
+      user: blog.user.id || blog.user
     }
+    updateBlogMutation.mutate(updatedBlog)
+    // try {
+    //   const updatedBlog = {
+    //     ...blog,
+    //     user: blog.user.id || blog.user,
+    //     likes: blog.likes + 1,
+    //   };
+    //   const returnedBlog = await blogService.update(blog.id, updatedBlog);
+    //   setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)));
+    // } catch {
+    //   notify("Error updating likes", "error");
+    // }
   };
 
   const handleDelete = async (blog) => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      try {
-        await blogService.remove(blog.id);
-        setBlogs(blogs.filter((b) => b.id !== blog.id));
-        notify(`Deleted ${blog.title}`);
-        navigate("/");
-      } catch (exception) {
-        notify("Error deleting blog: Unauthorized", "error");
-      }
+      deleteBlogMutation.mutate(blog.id)
+      navigate("/");
+      // try {
+      //   await blogService.remove(blog.id);
+      //   setBlogs(blogs.filter((b) => b.id !== blog.id));
+      //   notify(`Deleted ${blog.title}`);
+      //   navigate("/");
+      // } catch (exception) {
+      //   notify("Error deleting blog: Unauthorized", "error");
+      // }
     }
   };
+
+  
 
   return (
     <Card variant="outlined" sx={{ maxWidth: 600, mt: 4, mx: "auto", boxShadow: 3 }}>

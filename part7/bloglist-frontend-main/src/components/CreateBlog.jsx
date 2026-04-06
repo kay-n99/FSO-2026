@@ -1,6 +1,7 @@
 import blogService from "../services/blogs";
 import { TextField, Button } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 const CreateBlog = ({
   setTitle,
@@ -12,25 +13,26 @@ const CreateBlog = ({
   notify,
 }) => {
   const queryClient = useQueryClient();
-
+  const navigate = useNavigate();
   const newBlogMutation = useMutation({
     mutationFn: blogService.create,
-    onSucess: (newBlog) => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] })
-      notify(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+    onSuccess: (newBlog) => {
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+      notify(`a new blog ${newBlog.title} by ${newBlog.author} added`);
+      setTitle("");
+      setAuthor("");
+      setUrl("");
+      navigate("/");
     },
     onError: (error) => {
-      notify(error.response?.data?.error || 'Error creating blog', 'errro')
-    }
-  })
+      notify(error.response?.data?.error || "Error creating blog", "errro");
+    },
+  });
 
   const handleNew = async (event) => {
-    event.preventDefault()
-    newBlogMutation.mutate({ title, author, url})
-    setTitle('')
-    setAuthor('')
-    setUrl('')
-  }
+    event.preventDefault();
+    newBlogMutation.mutate({ title, author, url });
+  };
 
   // const handleNew = async (event) => {
   //   event.preventDefault();
