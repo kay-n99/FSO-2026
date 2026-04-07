@@ -12,6 +12,8 @@ import { AppBar, Toolbar, Button } from "@mui/material";
 import { useNotificationDispatch, useNotificationValue } from "./NotificationContext";
 import { useQuery } from "@tanstack/react-query"
 import { useUserDispatch, useUserValue } from "./UserContext";
+import Users from "./components/Users";
+import User from "./components/User";
 
 const App = () => {
   // const [blogs, setBlogs] = useState([]);
@@ -84,6 +86,9 @@ const App = () => {
             <Button color="inherit" component={Link} to="/create" sx={style}>
               New Blog
             </Button>
+            <Button color="inherit" component={Link} to="/users" sx={style}>
+                Users
+            </Button>
             {user ? (
               <Button color="inherit" onClick={handleLogout} sx={style}>
                 Logout
@@ -93,6 +98,7 @@ const App = () => {
                 Login
               </Button>
             )}
+            
           </Toolbar>
         </AppBar>
         
@@ -151,7 +157,9 @@ const App = () => {
             />
           }
         />
-      
+
+        <Route path="/users" element={<Users />} />
+        <Route path="/users/:id" element={<User />} />
       </Routes>
     </Router>
   );
