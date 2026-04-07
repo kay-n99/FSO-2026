@@ -8,18 +8,24 @@ import {
   CardActions, 
   Stack, 
   Link,
-  Divider 
+  Divider,
+  TextField,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useUserValue } from '../UserContext'
+import { useState } from 'react'
 
 const Blog = ({ blogs, notify }) => {
   const user = useUserValue();
   const id = useParams().id;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [comment, setComment] = useState('');
 
   const deleteBlogMutation = useMutation({
     mutationFn: blogService.remove,
@@ -40,6 +46,15 @@ const Blog = ({ blogs, notify }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blogs']})
       notify(`You liked '${updatedBlog.title}`)
+    }
+  })
+
+  const commentMutation = useMutation({
+    mutationFn: blogService.addComment,
+    onSuccess: (updatedBlog) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs']})
+      setComment('')
+      notify(`Comment added to ${updatedBlog.title}`)
     }
   })
 
@@ -83,6 +98,12 @@ const Blog = ({ blogs, notify }) => {
       // }
     }
   };
+
+  const handleComment = (event) => {
+    event.preventDefault()
+    if(!comment) return
+    commentMutation.mutate({id: blog.id, comment})
+  }
 
   
 
@@ -141,6 +162,36 @@ const Blog = ({ blogs, notify }) => {
           Back to List
         </Button>
       </CardActions>
+
+      <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>Comments</Typography>
+      
+      <form onSubmit={handleComment} style={{ marginBottom: '20px' }}>
+        <TextField
+          size="small"
+          value={comment}
+          onChange={({ target }) => setComment(target.value)}
+          placeholder="write a comment..."
+        />
+        <Button variant="contained" type="submit" sx={{ ml: 1 }}>
+          add comment
+        </Button>
+      </form>
+
+      {blog.comments && blog.comments.length > 0 ? (
+        <List sx={{ bgcolor: 'background.paper' }}>
+          {blog.comments.map((c, index) => (
+            <div key={index}>
+              <ListItem>
+                <ListItemText primary={c} />
+              </ListItem>
+              <Divider variant="inset" component="li" />
+            </div>
+          ))}
+        </List>
+      ) : (
+        <Typography variant="body2" color="textSecondary">No comments yet.</Typography>
+      )}
+    
     </Card>
   );
 };
