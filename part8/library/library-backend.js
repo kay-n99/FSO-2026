@@ -102,11 +102,9 @@ const typeDefs = `
   type Author{
     name: String!
     id: String!
-    born: Int!
-    bookCount: Int!
+    born: Int
+    bookCount: Int
   }
-  
-  
   type Book {
     title: String!
     published: Int!
@@ -122,7 +120,7 @@ const typeDefs = `
     bookCount: Int!
     authorCount: Int!
     allBooks(author: String, genre: String): [Book]!
-    allAuthors: [authorCount]!
+    allAuthors: [Author]!
   }
   type Mutation {
     addBook(
@@ -131,6 +129,10 @@ const typeDefs = `
       published: Int!
       genre: [String]!
     ) : Book
+    editAuthor(
+      name: String!
+      setBornTo: Int!
+    ) : Author
   }
 `;
 
@@ -161,7 +163,7 @@ const resolvers = {
         books.forEach((b) => {
           if (b.author == a.name) total++;
         });
-        arr.push({ name: a.name, bookCount: total });
+        arr.push({ ...a, bookCount: total });
       });
       return arr;
     },
@@ -178,6 +180,16 @@ const resolvers = {
       books = books.concat(book);
       return book;
     },
+    editAuthor: (root, args) => {
+      const existingAuthor = authors.find((a) => a.name === args.name);
+      if(existingAuthor){
+        const editedAuthor = {...existingAuthor, born: args.setBornTo}
+        authors = authors.map(a => a.name === args.name ? editedAuthor : a)
+        return editedAuthor;
+      }else{
+        return null;
+      }
+    }
   },
 };
 
