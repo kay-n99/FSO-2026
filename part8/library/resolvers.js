@@ -1,6 +1,7 @@
-const { ApolloServer } = require("@apollo/server");
-const { startStandaloneServer } = require("@apollo/server/standalone");
+const { graphQLError } = require("graphql");
 const { v1: uuid } = require("uuid");
+const Book = require("./models/book");
+const Author = require("./models/author");
 
 let authors = [
   {
@@ -98,108 +99,75 @@ let books = [
   you can remove the placeholder query once your first one has been implemented 
 */
 
-const typeDefs = `
-  type Author{
-    name: String!
-    id: String!
-    born: Int
-    bookCount: Int
-  }
-  type Book {
-    title: String!
-    published: Int!
-    author: String!
-    id: String!
-    genres: [String!]!
-  }
-  type authorCount {
-    name: String
-    bookCount: Int
-  }
-  type Query {
-    bookCount: Int!
-    authorCount: Int!
-    allBooks(author: String, genre: String): [Book]!
-    allAuthors: [Author]!
-  }
-  type Mutation {
-    addBook(
-      title: String!
-      author: String!
-      published: Int!
-      genre: [String]!
-    ) : Book
-    editAuthor(
-      name: String!
-      setBornTo: Int!
-    ) : Author
-  }
-`;
-
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (root, args) => {
-      let temp = books;
-
-      if (args.author) {
-        temp.map((b) => {
-          temp = temp.filter((b) => b.author === args.author);
-        });
-      }
-      if (args.genre) {
-        temp.map((b) => {
-          temp = temp.filter((b) => b.genres.includes(args.genre));
-        });
-      }
-
-      return temp;
+    bookCount: () => Book.collection.countDocuments(),
+    authorCount: () => Author.collection.countDocuments(),
+    allBooks: async (root, args) => {
+      return await Book.find({}).populate('author');;
     },
-    allAuthors: () => {
-      const arr = [];
-      authors.forEach((a) => {
-        let total = 0;
-        books.forEach((b) => {
-          if (b.author == a.name) total++;
-        });
-        arr.push({ ...a, bookCount: total });
-      });
-      return arr;
+    allAuthors: async (root, args) => {
+      return await Author.find({});
     },
+    // allBooks: (root, args) => {
+    //   let temp = Book.collection;
+
+    //   if (args.author) {
+    //     temp.map((b) => {
+    //       temp = temp.filter((b) => b.author === args.author);
+    //     });
+    //   }
+    //   if (args.genre) {
+    //     temp.map((b) => {
+    //       temp = temp.filter((b) => b.genres.includes(args.genre));
+    //     });
+    //   }
+
+    //   return temp;
+    // },
+    // allAuthors: () => {
+    //   const arr = [];
+    //   Author.collection.forEach((a) => {
+    //     let total = 0;
+    //     Book.collection.forEach((b) => {
+    //       if (b.author == a.name) total++;
+    //     });
+    //     arr.push({ ...a, bookCount: total });
+    //   });
+    //   return arr;
+    // },
   },
   Mutation: {
-    addBook: (root, args) => {
-      const book = { ...args, id: uuid() };
-
-      const existingAuthor = authors.find((a) => a.name === args.author);
+    addBook: async (root, args) => {
+      const existingAuthor = await Author.findOne({ name: args.author });
       if (!existingAuthor) {
-        const newAuthor = { name: args.author, id: uuid() };
-        authors = authors.concat(newAuthor);
+        author = new Author({ name: args.author });
+        await author.save();
       }
-      books = books.concat(book);
-      return book;
+      const book = new Book({
+        ...args,
+        author: author._id,
+      });
+
+      try {
+        await book.save();
+        return book.populate('author'); 
+      } catch (error) {
+        // Handle validation errors (e.g., duplicate titles if unique: true)
+        throw new Error(error.message);
+      }
     },
     editAuthor: (root, args) => {
-      const existingAuthor = authors.find((a) => a.name === args.name);
-      if(existingAuthor){
-        const editedAuthor = {...existingAuthor, born: args.setBornTo}
-        authors = authors.map(a => a.name === args.name ? editedAuthor : a)
+      const existingAuthor = Author.find((a) => a.name === args.name);
+      if (existingAuthor) {
+        const editedAuthor = { ...existingAuthor, born: args.setBornTo };
+        Author = Author.map((a) => (a.name === args.name ? editedAuthor : a));
         return editedAuthor;
-      }else{
+      } else {
         return null;
       }
-    }
+    },
   },
 };
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-});
-
-startStandaloneServer(server, {
-  listen: { port: 4000 },
-}).then(({ url }) => {
-  console.log(`Server ready at ${url}`);
-});
+module.exports = resolvers;

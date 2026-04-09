@@ -2,16 +2,18 @@
   "name": "library",
   "version": "1.0.0",
   "description": "",
-  "main": "library-backend.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node library-backend.js",
-    "dev": "node --watch library-backend.js"
+    "start": "node index.js",
+    "dev": "node --watch index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@apollo/server": "^5.5.0",
-    "graphql": "^16.13.2"
+    "dotenv": "^17.4.1",
+    "graphql": "^16.13.2",
+    "mongoose": "^9.4.1"
   }
 }
