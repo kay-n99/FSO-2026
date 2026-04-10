@@ -104,7 +104,21 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      return await Book.find({}).populate('author');;
+      const query = {};
+      if(args.genre){
+        query.genres = { $all: [args.genre]};
+      }
+
+      if(args.author){
+        const author = await Author.findOne({ name: args.author });
+        if(!author){
+            return [];
+        }
+
+        query.author = author._id;
+      }
+
+      return await Book.find(query).populate("author");
     },
     allAuthors: async (root, args) => {
       return await Author.find({});
@@ -151,7 +165,7 @@ const resolvers = {
 
       try {
         await book.save();
-        return book.populate('author'); 
+        return book.populate("author");
       } catch (error) {
         // Handle validation errors (e.g., duplicate titles if unique: true)
         throw new Error(error.message);
