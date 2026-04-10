@@ -105,14 +105,14 @@ const resolvers = {
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
       const query = {};
-      if(args.genre){
-        query.genres = { $all: [args.genre]};
+      if (args.genre) {
+        query.genres = { $all: [args.genre] };
       }
 
-      if(args.author){
+      if (args.author) {
         const author = await Author.findOne({ name: args.author });
-        if(!author){
-            return [];
+        if (!author) {
+          return [];
         }
 
         query.author = author._id;
@@ -151,11 +151,27 @@ const resolvers = {
     //   return arr;
     // },
   },
+  Author: {
+    bookCount: async (root) => {
+      return await Book.countDocuments({ author: root._id });
+    },
+  },
   Mutation: {
     addBook: async (root, args) => {
-      const existingAuthor = await Author.findOne({ name: args.author });
-      if (!existingAuthor) {
+      let author = await Author.findOne({ name: args.author });
+      if (!author) {
         author = new Author({ name: args.author });
+        try{
+            await author.save()
+        }catch(error){
+            throw new graphQLError('Saving author failed', {
+                extensions: {
+                    code: 'BAD_USER_INPUT',
+                    invalidArgs: args.author,
+                    error
+                }
+            })
+        }
         await author.save();
       }
       const book = new Book({
@@ -165,21 +181,45 @@ const resolvers = {
 
       try {
         await book.save();
-        return book.populate("author");
+        
       } catch (error) {
         // Handle validation errors (e.g., duplicate titles if unique: true)
-        throw new Error(error.message);
+        throw new GraphQLError('Saving book failed', {
+            extensions: {
+                code: 'BAD_USER_INPUT',
+                invalidArgs: args.title,
+                error
+            }
+        })
       }
+      return book.populate("author");
     },
-    editAuthor: (root, args) => {
-      const existingAuthor = Author.find((a) => a.name === args.name);
-      if (existingAuthor) {
-        const editedAuthor = { ...existingAuthor, born: args.setBornTo };
-        Author = Author.map((a) => (a.name === args.name ? editedAuthor : a));
-        return editedAuthor;
-      } else {
-        return null;
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name })
+      if(!author) return null
+
+      author.born = args.setBornTo
+      try{
+        return await author.save()
+      }catch(error){
+        throw new GraphQLError('Editing author failed', {
+            extensions: {
+                code: 'BAD_USER_INPUT',
+                invalidArgs: args.name,
+                error
+            }
+        })
       }
+      return updatedAuthor;
+
+    //   const author = Author.find((a) => a.name === args.name);
+    //   if (author) {
+    //     const editedAuthor = { ...author, born: args.setBornTo };
+    //     Author = Author.map((a) => (a.name === args.name ? editedAuthor : a));
+    //     return editedAuthor;
+    //   } else {
+    //     return null;
+    //   }
     },
   },
 };
