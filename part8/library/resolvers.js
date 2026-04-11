@@ -1,9 +1,12 @@
 const { GraphQLError } = require("graphql");
+const { PubSub } = require("graphql-subscriptions");
 const { v1: uuid } = require("uuid");
 const Book = require("./models/book");
 const Author = require("./models/author");
 const jwt = require("jsonwebtoken");
 const User = require("./models/user");
+
+const pubsub = new PubSub();
 
 let authors = [
   {
@@ -202,15 +205,18 @@ const resolvers = {
           },
         });
       }
-      return book.populate("author");
+      const savedBook = await book.populate("author");
+      pubsub.publish("BOOK_ADDED", { bookAdded: savedBook });
+
+      return savedBook;
     },
     editAuthor: async (root, args) => {
-        const currentUser = context.currentUser;
-        if(!currentUser){
-            throw new GraphQLError('not authenticated', {
-                extensions: { code: 'BAD_USER_INPUT'}
-            });
-        }
+      const currentUser = context.currentUser;
+      if (!currentUser) {
+        throw new GraphQLError("not authenticated", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
+      }
       const author = await Author.findOne({ name: args.name });
       if (!author) return null;
 
@@ -268,6 +274,11 @@ const resolvers = {
         id: user._id,
       };
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) };
+    },
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterableIterator(['BOOK_ADDED'])
     },
   },
 };

@@ -1,4 +1,3 @@
-
 const typeDefs = `
   type Author{
     name: String!
@@ -48,6 +47,9 @@ const typeDefs = `
       password: String!
     ) : Token
   }
+  type Subscription {
+    bookAdded: Book!
+  }
 `;
 
-module.exports = typeDefs
+module.exports = typeDefs;
