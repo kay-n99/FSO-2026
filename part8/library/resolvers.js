@@ -210,15 +210,17 @@ const resolvers = {
 
       return savedBook;
     },
-    editAuthor: async (root, args) => {
-      const currentUser = context.currentUser;
-      if (!currentUser) {
+    editAuthor: async (root, args, context) => {
+      if (!context.currentUser) {
         throw new GraphQLError("not authenticated", {
           extensions: { code: "BAD_USER_INPUT" },
         });
       }
       const author = await Author.findOne({ name: args.name });
-      if (!author) return null;
+      if (!author) {
+        console.log("Author not found:", args.name);
+        return null;
+      }
 
       author.born = args.setBornTo;
       try {
@@ -278,7 +280,7 @@ const resolvers = {
   },
   Subscription: {
     bookAdded: {
-      subscribe: () => pubsub.asyncIterableIterator(['BOOK_ADDED'])
+      subscribe: () => pubsub.asyncIterableIterator(["BOOK_ADDED"]),
     },
   },
 };
