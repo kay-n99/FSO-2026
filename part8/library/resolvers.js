@@ -108,7 +108,7 @@ const resolvers = {
     allBooks: async (root, args) => {
       const query = {};
       if (args.genre) {
-        query.genres = { $all: [args.genre] };
+        query.genres = { $in: [args.genre] };
       }
 
       if (args.author) {
