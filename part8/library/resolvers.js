@@ -125,8 +125,18 @@ const resolvers = {
 
       return await Book.find(query).populate("author");
     },
-    allAuthors: async (root, args) => {
-      return await Author.find({});
+    allAuthors: async () => {
+      console.log('Author.find')
+      const authors = await Author.find({})
+      const books = await Book.find({})
+
+      return authors.map(author => {
+        return {
+          ...author._doc,
+          id: author._id,
+          bookCount: books.filter(b => b.author.toString() === author._id.toString()).length
+        }
+      })
     },
     me: (root, args, context) => {
       return context.currentUser;
